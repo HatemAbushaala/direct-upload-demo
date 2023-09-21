@@ -8,6 +8,9 @@ module.exports = async function () {
   //   { "name": "Venusaur" }
   // ]
     // TODO change it to strapi server
-  const result = await fetch('https://e2260277-21dc-41fe-8c3d-55637e7b4fb4.mock.pstmn.io/pages');
-  return (await result.json());
+  const result = await fetch('https://d257-85-108-196-38.ngrok.io/api/all-pages');
+  const allPages = await result.json()
+  return allPages.flatMap(p=>{
+    return p.pages.map(sp=>({...sp,path:`${p.slug}/${sp.id}`}))
+  })
 };
