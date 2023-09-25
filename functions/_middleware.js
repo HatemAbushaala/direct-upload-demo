@@ -1,3 +1,5 @@
+import parse from '../parse.js'
+
 export async function onRequest({request,env}) {
     const BASE_URL = env.API_HOST
     const PAGE_REQUEST_URL =`${BASE_URL}/api/pages`
