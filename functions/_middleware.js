@@ -9,7 +9,7 @@ export async function onRequest({request,env,next}) {
     
     console.log('url',url,'path',pathname)
 
-    if(pathname === 'data.json') return await next()
+    if(pathname === 'data.json' || pathname.endsWith('index.html')) return await next()
 
     const main_page = await fetchSubPages(env.CF_PAGES_URL,pathname)
     // check if page not found
@@ -24,8 +24,9 @@ export async function onRequest({request,env,next}) {
             (sub_page) => sub_page.id == sub_page_id_cookie
       )
       // check if page is still exist in the database
-      if(user_previous_visited_page) 
-      return fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}`)
+      if(user_previous_visited_page) {
+        return fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}/index.html`)
+      }
       // return new Response(user_previous_visited_page.html,{
       //   headers:{
       //     'content-type':'text/html'
@@ -38,14 +39,14 @@ export async function onRequest({request,env,next}) {
 
     const random_page_index = Math.floor(Math.random() * sub_pages.length);
     const random_page = sub_pages[random_page_index]
-    return fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}`)
+    const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}/index.html`)
 
-    // return new Response(random_page.html,{
-    //   headers:{
-    //     'content-type':'text/html',
-    //     "Set-Cookie":`${pathname}=${random_page.id}; path=/`
-    //   }
-    // }) 
+    return new Response(response.body,{
+      headers:{
+        'content-type':'text/html',
+        "Set-Cookie":`${pathname}=${random_page.id}; path=/`
+      }
+    }) 
     // return Response.redirect(getCFPageUrl(pathname,random_page.id), 301);
 
   }
