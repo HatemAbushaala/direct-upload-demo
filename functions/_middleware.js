@@ -8,13 +8,11 @@ export async function onRequest({request,env,next}) {
     const url = new URL(request.url);
     const pathname = url.pathname.slice(1) // note that path starts with: /
     
-    console.log('url',url)
-
     // workaround to skip nested path
     if(pathname === 'data.json' || pathname.includes('/')) return await next()
 
-    const main_page = await fetchSubPages(env.CF_PAGES_URL,pathname)
-    console.log('time after finish fetch sub pages',performance.now() - start)
+    const main_page = await fetchSubPages(env,pathname)
+
     // check if page not found
     if(!main_page || main_page.error) return new Response('Not found',{status:404})
 
@@ -64,12 +62,10 @@ export async function onRequest({request,env,next}) {
   }
 
 
-  async function fetchSubPages(requestUrl,pathname){
-    const response = await fetch(`${requestUrl}/data.json`)
+  async function fetchSubPages(env,pathname){
+    const response = await env.ASSETS.fetch(`${env.CF_PAGES_URL}/data.json`)
     const pages_json = await response.json()
-    console.log('pages',pages_json)
     return pages_json?.find(p=>p.slug === pathname)
-
     //// old code to fetch from strapi
     // const sub_pages = await fetch(`${requestUrl}/${pathname}`)
     // return sub_pages.json()
