@@ -9,7 +9,8 @@ export async function onRequest({request,env,next}) {
     
     console.log('url',url,'path',pathname)
 
-    if(pathname === 'data.json' || pathname.endsWith('index.html')) return await next()
+    // workaround to skip nested path
+    if(pathname === 'data.json' || pathname.includes('/')) return await next()
 
     const main_page = await fetchSubPages(env.CF_PAGES_URL,pathname)
     // check if page not found
