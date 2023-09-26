@@ -44,7 +44,7 @@ export async function onRequest({request,env,next}) {
 
     return new Response(response.body,{
       headers:{
-        'content-type':'text/html',
+        // 'content-type':'text/html',
         "Set-Cookie":`${pathname}=${random_page.id}; path=/`
       }
     }) 
