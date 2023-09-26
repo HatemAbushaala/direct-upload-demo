@@ -1,18 +1,20 @@
 import parse from '../parse.js'
 
 export async function onRequest({request,env,next}) {
+    const start = performance.now()
     const BASE_URL = env.API_HOST
     const STRAPI_PAGE_REQUEST_URL =`${BASE_URL}/api/pages`
 
     const url = new URL(request.url);
     const pathname = url.pathname.slice(1) // note that path starts with: /
     
-    console.log('url',url,'path',pathname)
+    console.log('url',url)
 
     // workaround to skip nested path
     if(pathname === 'data.json' || pathname.includes('/')) return await next()
 
     const main_page = await fetchSubPages(env.CF_PAGES_URL,pathname)
+    console.log('time after finish fetch sub pages',performance.now() - start)
     // check if page not found
     if(!main_page || main_page.error) return new Response('Not found',{status:404})
 
@@ -26,7 +28,10 @@ export async function onRequest({request,env,next}) {
       )
       // check if page is still exist in the database
       if(user_previous_visited_page) {
-        return fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}/index.html`)
+        const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}/index.html`)
+        console.log('time after finish fetch static page',performance.now() - start)
+
+        return response
       }
       // return new Response(user_previous_visited_page.html,{
       //   headers:{
@@ -41,6 +46,7 @@ export async function onRequest({request,env,next}) {
     const random_page_index = Math.floor(Math.random() * sub_pages.length);
     const random_page = sub_pages[random_page_index]
     const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}/index.html`)
+    console.log('time after finish fetch static page',performance.now() - start)
 
     return new Response(response.body,{
       headers:{
