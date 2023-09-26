@@ -1,16 +1,27 @@
-
-
+const fs = require('fs').promises
+const axios = require('axios')
 module.exports = async function () {
 
-  // return [
-  //   { "name": "Bulbasaur" },
-  //   { "name": "Ivysaur" },
-  //   { "name": "Venusaur" }
-  // ]
-    // TODO change it to strapi server
-  const result = await fetch('https://590b-78-183-106-175.ngrok.io/api/all-pages');
-  const allPages = await result.json()
-  return allPages.flatMap(p=>{
+  console.log('env',typeof env,process.env.API_HOST)
+  const BASE_URL = process.env.API_HOST ?? 'http://127.0.0.1:1337'
+  const response = await axios.get(`${BASE_URL}/api/all-pages`);
+  const allPages = response.data
+  const res =  allPages.flatMap(p=>{
     return p.pages.map(sp=>({...sp,path:`${p.slug}/${sp.id}`}))
   })
+
+  // remove html from response to make file size smaller
+  const pages_without_html = allPages.map(p=>{
+    return {
+      id:p.id,
+      slug:p.slug,
+      name:p.name,
+      sub_pages:p.pages.map(sp=>({id:sp.id,path:`${p.slug}/${sp.id}`}))
+    }
+  })
+
+  // save file so we can read it from middleware instead of fetching data from strapi
+  await fs.writeFile('./strapi-data.json',JSON.stringify(pages_without_html))
+
+  return res
 };
