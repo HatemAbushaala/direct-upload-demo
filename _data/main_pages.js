@@ -5,8 +5,6 @@ compatibility_flags = [ "nodejs_compat" ]
 
 
 module.exports = async function () {
-
-  console.log('env',typeof env,process.env.API_HOST)
   const BASE_URL = process.env.API_HOST ?? 'http://127.0.0.1:1337'
   const response = await axios.get(`${BASE_URL}/api/all-pages`);
   const allPages = response.data
@@ -25,7 +23,11 @@ module.exports = async function () {
   })
 
   // save file so we can read it from middleware instead of fetching data from strapi
-  await fs.writeFile('./strapi-data.json',JSON.stringify(pages_without_html))
+  try {
+    await fs.writeFile('./strapi-data.json',JSON.stringify(pages_without_html))
+  } catch (err) {
+    
+  }
 
   return res
 };
