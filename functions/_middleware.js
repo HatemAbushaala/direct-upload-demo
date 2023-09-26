@@ -2,15 +2,16 @@ import parse from '../parse.js'
 
 export async function onRequest({request,env,next}) {
     const BASE_URL = env.API_HOST
-    const PAGE_REQUEST_URL =`${BASE_URL}/api/pages`
+    const STRAPI_PAGE_REQUEST_URL =`${BASE_URL}/api/pages`
 
     const url = new URL(request.url);
     const pathname = url.pathname.slice(1) // note that path starts with: /
-    console.log(url,pathname)
+    
+    console.log('url',url,'path',pathname)
 
     if(pathname === 'data.json') return await next()
 
-    const sub_pages = await fetchSubPages(PAGE_REQUEST_URL,pathname)
+    const sub_pages = await fetchSubPages(env.CF_PAGES_URL,pathname)
     // check if page not found
     if(!sub_pages || sub_pages.error) return new Response('Not found',{status:404})
 
@@ -47,8 +48,7 @@ export async function onRequest({request,env,next}) {
 
 
   async function fetchSubPages(requestUrl,pathname){
-    console.log('CF_PAGES_URL',process.env.CF_PAGES_URL)
-    const response = await fetch(`${process.env.CF_PAGES_URL}/data.json`)
+    const response = await fetch(`${requestUrl}/data.json`)
     const pages_json = response.json()
     console.log('pages',pages_json)
     return pages_json.find(p=>p.slug === pathname)
