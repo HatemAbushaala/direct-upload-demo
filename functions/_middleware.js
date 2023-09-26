@@ -47,7 +47,8 @@ export async function onRequest({request,env,next}) {
 
 
   async function fetchSubPages(requestUrl,pathname){
-    const response = await fetch(`/data.json`)
+    console.log('CF_PAGES_URL',process.env.CF_PAGES_URL)
+    const response = await fetch(`${process.env.CF_PAGES_URL}/data.json`)
     const pages_json = response.json()
     console.log('pages',pages_json)
     return pages_json.find(p=>p.slug === pathname)
