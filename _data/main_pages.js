@@ -1,8 +1,5 @@
-const fs = require('node:fs').promises
+// const fs = require('node:fs').promises
 const axios = require('axios')
-
-compatibility_flags = [ "nodejs_compat" ]
-
 
 module.exports = async function () {
   const BASE_URL = process.env.API_HOST ?? 'http://127.0.0.1:1337'
@@ -23,11 +20,11 @@ module.exports = async function () {
   })
 
   // save file so we can read it from middleware instead of fetching data from strapi
-  try {
-    await fs.writeFile('./strapi-data.json',JSON.stringify(pages_without_html))
-  } catch (err) {
+  // try {
+  //   await fs.writeFile('./strapi-data.json',JSON.stringify(pages_without_html))
+  // } catch (err) {
     
-  }
+  // }
 
   return res
 };
