@@ -1,5 +1,9 @@
 const fs = require('node:fs').promises
 const axios = require('axios')
+
+compatibility_flags = [ "nodejs_compat" ]
+
+
 module.exports = async function () {
 
   console.log('env',typeof env,process.env.API_HOST)
