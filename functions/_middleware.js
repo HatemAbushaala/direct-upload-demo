@@ -49,9 +49,9 @@ export async function onRequest({request,env,next}) {
 
   async function fetchSubPages(requestUrl,pathname){
     const response = await fetch(`${requestUrl}/data.json`)
-    const pages_json = response.json()
+    const pages_json = await response.json()
     console.log('pages',pages_json)
-    return pages_json.find(p=>p.slug === pathname)
+    return pages_json?.find(p=>p.slug === pathname)
 
     //// old code to fetch from strapi
     // const sub_pages = await fetch(`${requestUrl}/${pathname}`)
