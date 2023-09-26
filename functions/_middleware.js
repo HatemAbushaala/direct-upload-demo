@@ -11,10 +11,11 @@ export async function onRequest({request,env,next}) {
 
     if(pathname === 'data.json') return await next()
 
-    const sub_pages = await fetchSubPages(env.CF_PAGES_URL,pathname)
+    const main_page = await fetchSubPages(env.CF_PAGES_URL,pathname)
     // check if page not found
-    if(!sub_pages || sub_pages.error) return new Response('Not found',{status:404})
+    if(!main_page || main_page.error) return new Response('Not found',{status:404})
 
+    const sub_pages = main_page.pages
     // Determine which group this requester is in.
     const cookie = parse(request.headers.get("Cookie") || "");
     const sub_page_id_cookie = cookie[pathname] // id of sub page || null
@@ -24,11 +25,12 @@ export async function onRequest({request,env,next}) {
       )
       // check if page is still exist in the database
       if(user_previous_visited_page) 
-      return new Response(user_previous_visited_page.html,{
-        headers:{
-          'content-type':'text/html'
-        }
-      }) 
+      return fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}`)
+      // return new Response(user_previous_visited_page.html,{
+      //   headers:{
+      //     'content-type':'text/html'
+      //   }
+      // }) 
       
     //   return Response.redirect(getCFPageUrl(pathname,user_previous_visited_page.id), 301);
 
@@ -36,12 +38,14 @@ export async function onRequest({request,env,next}) {
 
     const random_page_index = Math.floor(Math.random() * sub_pages.length);
     const random_page = sub_pages[random_page_index]
-    return new Response(random_page.html,{
-      headers:{
-        'content-type':'text/html',
-        "Set-Cookie":`${pathname}=${random_page.id}; path=/`
-      }
-    }) 
+    return fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}`)
+
+    // return new Response(random_page.html,{
+    //   headers:{
+    //     'content-type':'text/html',
+    //     "Set-Cookie":`${pathname}=${random_page.id}; path=/`
+    //   }
+    // }) 
     // return Response.redirect(getCFPageUrl(pathname,random_page.id), 301);
 
   }
