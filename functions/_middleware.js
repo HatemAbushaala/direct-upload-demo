@@ -1,11 +1,14 @@
 import parse from '../parse.js'
 
-export async function onRequest({request,env}) {
+export async function onRequest({request,env,next}) {
     const BASE_URL = env.API_HOST
     const PAGE_REQUEST_URL =`${BASE_URL}/api/pages`
 
     const url = new URL(request.url);
     const pathname = url.pathname.slice(1) // note that path starts with: /
+    console.log(url,pathname)
+
+    if(pathname === 'data.json') return await next()
 
     const sub_pages = await fetchSubPages(PAGE_REQUEST_URL,pathname)
     // check if page not found
@@ -44,8 +47,14 @@ export async function onRequest({request,env}) {
 
 
   async function fetchSubPages(requestUrl,pathname){
-    const sub_pages = await fetch(`${requestUrl}/${pathname}`)
-    return sub_pages.json()
+    const response = await fetch(`/data.json`)
+    const pages_json = response.json()
+    console.log('pages',pages_json)
+    return pages_json.find(p=>p.slug === pathname)
+
+    //// old code to fetch from strapi
+    // const sub_pages = await fetch(`${requestUrl}/${pathname}`)
+    // return sub_pages.json()
   }
   function getCFPageUrl(main_page_slug,sub_page_id){
     return `https://direct-upload-demo-10q.pages.dev/${main_page_slug}/${sub_page_id}`
