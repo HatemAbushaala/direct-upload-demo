@@ -28,10 +28,10 @@ export async function onRequest({request,env,next}) {
       )
       // check if page is still exist in the database
       if(user_previous_visited_page) {
-        const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}/index.html`)
-        console.log('time after finish fetch static page',performance.now() - start)
-
-        return response
+        return env.ASSETS.fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}`)
+        // const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${user_previous_visited_page.id}/index.html`)
+        // console.log('time after finish fetch static page',performance.now() - start)
+        // return response
       }
       // return new Response(user_previous_visited_page.html,{
       //   headers:{
@@ -45,15 +45,20 @@ export async function onRequest({request,env,next}) {
 
     const random_page_index = Math.floor(Math.random() * sub_pages.length);
     const random_page = sub_pages[random_page_index]
-    const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}/index.html`)
-    console.log('time after finish fetch static page',performance.now() - start)
+    // const response = await fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}/index.html`)
 
-    return new Response(response.body,{
-      headers:{
-        // 'content-type':'text/html',
-        "Set-Cookie":`${pathname}=${random_page.id}; path=/`
-      }
-    }) 
+       // get the static file from ASSETS, and attach a cookie
+    const asset = await env.ASSETS.fetch(`${env.CF_PAGES_URL}/${main_page.slug}/${random_page.id}`)
+    let response = new Response(asset.body, asset)
+    response.headers.append("Set-Cookie", `${pathname}=${random_page.id}; path=/`)
+    return response
+
+    // return new Response(response.body,{
+    //   headers:{
+    //     // 'content-type':'text/html',
+    //     "Set-Cookie":`${pathname}=${random_page.id}; path=/`
+    //   }
+    // }) 
     // return Response.redirect(getCFPageUrl(pathname,random_page.id), 301);
 
   }
